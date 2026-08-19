@@ -428,23 +428,45 @@ function pokemonDataToMonBase(data, level, proficient) {
   };
 }
 
+function dndLevelFromPokemonLevel(gameLevel) {
+  const n = Number(gameLevel) || 1;
+  return clamp(Math.ceil(Math.max(1, n) / 5), 1, 20);
+}
+
+function learnsetRule(entry, level) {
+  const details = entry.details || [];
+  if (!details.length) return { allowed: true, kind: 'listed', dndLevel: 1, gameLevel: 0, method: 'listed' };
+
+  const nonLevel = details.filter(d => d.method !== 'level-up');
+  if (nonLevel.length) {
+    return { allowed: true, kind: 'other', dndLevel: 1, gameLevel: 0, method: nonLevel[0].method || 'listed' };
+  }
+
+  const levelDetails = details.filter(d => d.method === 'level-up');
+  if (!levelDetails.length) return { allowed: true, kind: 'listed', dndLevel: 1, gameLevel: 0, method: 'listed' };
+  const earliest = levelDetails.reduce((best, d) => Number(d.level) < Number(best.level) ? d : best, levelDetails[0]);
+  const gameLevel = Math.max(1, Number(earliest.level) || 1);
+  const dndLevel = dndLevelFromPokemonLevel(gameLevel);
+  return { allowed: dndLevel <= level, kind: 'level-up', dndLevel, gameLevel, method: 'level-up', version: earliest.version || '' };
+}
+
 function permittedLearnset(mon) {
   const level = Number(mon.level) || 1;
-  return (mon.learnset || []).filter(entry => {
-    if (!entry.details?.length) return true;
-    return entry.details.some(d => d.method !== 'level-up' || Number(d.level) <= level);
-  }).sort((a, b) => displayName(a.name).localeCompare(displayName(b.name)));
+  return (mon.learnset || []).filter(entry => learnsetRule(entry, level).allowed)
+    .sort((a, b) => displayName(a.name).localeCompare(displayName(b.name)));
 }
 
 function bestDefaultMoveNames(mon) {
   const level = Number(mon.level) || 1;
   const permitted = permittedLearnset(mon).map(entry => {
-    const levelDetails = entry.details.filter(d => d.method === 'level-up' && d.level <= level);
-    const bestLevel = levelDetails.length ? Math.max(...levelDetails.map(d => d.level)) : -1;
-    const learnedByLevel = bestLevel >= 0;
-    return { ...entry, bestLevel, learnedByLevel };
+    const rule = learnsetRule(entry, level);
+    return { ...entry, rule };
   });
-  permitted.sort((a, b) => (Number(b.learnedByLevel) - Number(a.learnedByLevel)) || (b.bestLevel - a.bestLevel) || a.name.localeCompare(b.name));
+  permitted.sort((a, b) => {
+    const aLevel = a.rule.kind === 'level-up' ? a.rule.dndLevel : 0;
+    const bLevel = b.rule.kind === 'level-up' ? b.rule.dndLevel : 0;
+    return (bLevel - aLevel) || a.name.localeCompare(b.name);
+  });
   return permitted.slice(0, 4).map(x => x.name);
 }
 
@@ -531,12 +553,13 @@ async function ensureLearnset(index) {
 }
 
 function describeLearn(entry, level) {
-  if (!entry?.details?.length) return 'Listed move';
-  const usable = entry.details.filter(d => d.method !== 'level-up' || d.level <= level);
-  const levelUp = usable.filter(d => d.method === 'level-up').sort((a, b) => b.level - a.level)[0];
-  if (levelUp) return `Level ${levelUp.level}`;
-  const method = usable[0]?.method || entry.details[0]?.method || 'listed';
-  return displayName(method);
+  if (!entry) return 'Listed move';
+  const rule = learnsetRule(entry, Number(level) || 1);
+  if (rule.kind === 'level-up') {
+    return `${rule.allowed ? 'D&D Lv' : 'LOCKED · D&D Lv'} ${rule.dndLevel} (Pokémon Lv ${rule.gameLevel})`;
+  }
+  if (rule.kind === 'other') return displayName(rule.method);
+  return 'Listed move';
 }
 
 function renderSetupMoves() {
@@ -547,14 +570,22 @@ function renderSetupMoves() {
     setupMovesEditor.innerHTML = `<div class="learnset-empty"><p><strong>${escapeHtml(mon.name)}</strong> has not loaded a PokéAPI learnset yet.</p><button id="loadLearnsetBtn" class="button secondary">Load Legal Moves</button></div>`;
     document.getElementById('loadLearnsetBtn').addEventListener('click', () => ensureLearnset(runtime.setupTeamIndex)); return;
   }
-  const allowed = permittedLearnset(mon);
+  const allMoves = (mon.learnset || []).slice().sort((a, b) => displayName(a.name).localeCompare(displayName(b.name)));
+  const allowed = allMoves.filter(entry => learnsetRule(entry, Number(mon.level) || 1).allowed);
   const allowedMap = new Map(allowed.map(entry => [entry.name, entry]));
   setupMovesEditor.innerHTML = `
-    <div class="moveset-meta"><div><strong>${allowed.length}</strong><span>currently permitted moves</span></div><div><strong>Lv ${mon.level}</strong><span>Pokémon level</span></div><label class="proficiency-toggle inline"><input id="teamProficientToggle" type="checkbox" ${mon.proficient ? 'checked' : ''}><span><strong>Trainer Proficient</strong><small>${mon.proficient ? `${sign(trainerPB())} PB applies` : 'PB is withheld'}</small></span></label></div>
+    <div class="moveset-meta"><div><strong>${allowed.length} / ${allMoves.length}</strong><span>moves currently permitted</span></div><div><strong>Lv ${mon.level}</strong><span>D&D Pokémon level</span></div><label class="proficiency-toggle inline"><input id="teamProficientToggle" type="checkbox" ${mon.proficient ? 'checked' : ''}><span><strong>Trainer Proficient</strong><small>${mon.proficient ? `${sign(trainerPB())} PB applies` : 'PB is withheld'}</small></span></label></div>
+    <p class="tiny-note">Level-up learnsets are mapped from Pokémon's 1–100 scale to D&D's 1–20 scale at 5 Pokémon levels per D&D level. Locked moves stay visible below.</p>
     <div class="move-picker-grid">${mon.moves.map((m, slot) => {
-      const currentAllowed = allowedMap.has(m.apiName || slug(m.name));
-      const options = allowed.map(entry => `<option value="${escapeAttr(entry.name)}" ${(m.apiName || slug(m.name)) === entry.name ? 'selected' : ''}>${escapeHtml(displayName(entry.name))} — ${escapeHtml(describeLearn(entry, mon.level))}</option>`).join('');
-      return `<div class="move-picker"><label>Move ${slot + 1}</label><select class="legal-move-select" data-slot="${slot}">${!currentAllowed ? `<option value="${escapeAttr(m.apiName || slug(m.name))}" selected>${escapeHtml(m.name)} — currently outside filtered list</option>` : ''}${options}</select><div class="chosen-move-summary"><span>${escapeHtml(m.category.toUpperCase())} · ${escapeHtml(m.type)}</span><span>${m.sureHit ? 'Sure Hit' : m.accuracy ? `${m.accuracy}% Accuracy` : 'No Accuracy Roll'}</span><span>${m.power ? `Power ${m.power} → ${m.die}` : m.category === 'status' ? 'Status' : m.die}</span></div>${m.effect ? `<p>${escapeHtml(m.effect)}</p>` : ''}</div>`;
+      const currentName = m.apiName || slug(m.name);
+      const currentAllowed = allowedMap.has(currentName);
+      const options = allMoves.map(entry => {
+        const rule = learnsetRule(entry, Number(mon.level) || 1);
+        const selected = currentName === entry.name ? 'selected' : '';
+        const disabled = !rule.allowed && !selected ? 'disabled' : '';
+        return `<option value="${escapeAttr(entry.name)}" ${selected} ${disabled}>${escapeHtml(displayName(entry.name))} — ${escapeHtml(describeLearn(entry, mon.level))}</option>`;
+      }).join('');
+      return `<div class="move-picker"><label>Move ${slot + 1}</label><select class="legal-move-select" data-slot="${slot}">${!allMoves.some(entry => entry.name === currentName) ? `<option value="${escapeAttr(currentName)}" selected>${escapeHtml(m.name)} — saved/custom move</option>` : ''}${options}</select><div class="chosen-move-summary"><span>${escapeHtml(m.category.toUpperCase())} · ${escapeHtml(m.type)}</span><span>${m.sureHit ? 'Sure Hit' : m.accuracy ? `${m.accuracy}% Accuracy` : 'No Accuracy Roll'}</span><span>${m.power ? `Power ${m.power} → ${m.die}` : m.category === 'status' ? 'Status' : m.die}</span></div>${m.effect ? `<p>${escapeHtml(m.effect)}</p>` : ''}</div>`;
     }).join('')}</div>`;
   document.getElementById('teamProficientToggle').addEventListener('change', e => { mon.proficient = e.target.checked; renderAll(); });
   setupMovesEditor.querySelectorAll('.legal-move-select').forEach(sel => sel.addEventListener('change', async e => {

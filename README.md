@@ -1,6 +1,14 @@
-# Trainer Field Sheet — Playtest v0.2
+# Trainer Field Sheet — Playtest v0.3
 
 A dependency-free static web prototype for a Pokémon Trainer D&D class. It is designed for Cloudflare Pages and now uses PokéAPI in the browser for Pokémon, base stats, types, artwork, abilities and legal move data.
+
+
+## v0.3 learnset fix
+
+- Fixed level-up moves being incorrectly compared against D&D levels 1–20 using their original Pokémon-game levels 1–100.
+- Pokémon level-up requirements now map at **5 Pokémon levels = 1 D&D level** (`ceil(game level / 5)`).
+- Locked level-up moves remain visible in the move selectors with their converted requirement instead of disappearing.
+- Example: Heatmor's Fire Lash at Pokémon level 35 maps to D&D Pokémon level 7.
 
 ## v0.2 changes
 

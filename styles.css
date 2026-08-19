@@ -241,3 +241,90 @@ h3 { margin-bottom: .6rem; }
   .settings-grid .setting-row { grid-template-columns:1fr; }
   .checkbox-row input { justify-self:start; }
 }
+
+/* v0.2 — tabs, PokéAPI team builder and proficiency */
+.tabs { display:flex; gap:6px; padding:6px; margin-bottom:16px; width:max-content; max-width:100%; }
+.tab-button { border:0; border-radius:11px; padding:.7rem 1rem; background:transparent; color:var(--muted); font-weight:800; }
+.tab-button.active { background:var(--panel-3); color:var(--text); }
+.tab-view { display:none; }
+.tab-view.active { display:block; }
+.identity-row { display:flex; gap:14px; align-items:center; }
+.mon-badge.image { overflow:hidden; padding:0; background:#0c151f; }
+.mon-badge.image img { width:100%; height:100%; object-fit:contain; display:block; }
+.mon-badge.large { width:74px; height:74px; min-width:74px; border-radius:18px; font-size:1rem; }
+.proficiency-line { margin-top:7px; color:var(--muted); font-size:.75rem; }
+.proficiency-line.trained strong { color:var(--good); }
+.proficiency-line.untrained strong { color:var(--warn); }
+.summary-grid.four { grid-template-columns:repeat(4,1fr); }
+.move-effect { min-height:2.2em; color:var(--muted); font-size:.75rem; line-height:1.42; margin:0 0 9px; }
+.team-slot.empty { opacity:.72; border-style:dashed; }
+.compact-slot { padding:8px; }
+
+.setup-layout { display:grid; grid-template-columns:300px minmax(520px,1fr) 330px; gap:16px; align-items:start; }
+.pokemon-browser, .setup-main, .setup-team, .moveset-setup { padding:16px; }
+.pokemon-browser, .setup-main, .setup-team { min-height:620px; }
+.pokemon-results { height:520px; overflow:auto; display:grid; align-content:start; gap:6px; padding-right:3px; }
+.pokemon-result { display:grid; grid-template-columns:58px 1fr; gap:8px; align-items:center; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--text); padding:9px 10px; text-align:left; }
+.pokemon-result:hover { border-color:var(--accent-2); }
+.pokemon-result span { color:var(--muted); font-size:.7rem; font-variant-numeric:tabular-nums; }
+.api-status { font-size:.68rem; font-weight:800; color:var(--muted); }
+.api-status.ready { color:var(--good); }
+.api-status.error { color:var(--bad); }
+.api-error { border:1px solid rgba(255,122,122,.35); background:rgba(255,122,122,.06); color:#ffd1d1; border-radius:12px; padding:12px; line-height:1.45; }
+.loading-card, .learnset-empty, .candidate-empty { border:1px dashed var(--line); border-radius:14px; padding:18px; color:var(--muted); }
+.candidate-head { display:grid; grid-template-columns:190px 1fr; gap:20px; align-items:center; margin-bottom:16px; }
+.candidate-art { min-height:190px; display:grid; place-items:center; background:#0d1620; border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+.candidate-art img { width:100%; height:190px; object-fit:contain; }
+.candidate-art span { font-size:3rem; color:var(--muted); }
+.compact { margin-bottom:0; }
+.candidate-stats { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:16px; }
+.candidate-stats > div { display:grid; gap:2px; text-align:center; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:10px 7px; }
+.candidate-stats span, .candidate-stats small { color:var(--muted); font-size:.66rem; font-weight:800; }
+.candidate-stats strong { font-size:1.15rem; }
+.candidate-controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.proficiency-toggle { grid-column:1/-1; display:grid; grid-template-columns:24px 1fr; gap:10px; align-items:start; border:1px solid var(--line); border-radius:12px; background:var(--panel-2); padding:11px; }
+.proficiency-toggle input { width:20px; height:20px; margin-top:2px; }
+.proficiency-toggle strong, .proficiency-toggle small { display:block; }
+.proficiency-toggle small { color:var(--muted); line-height:1.35; margin-top:3px; }
+.proficiency-toggle.inline { grid-column:auto; min-width:240px; padding:8px 10px; }
+.candidate-foot { display:flex; justify-content:space-between; align-items:end; gap:16px; margin-top:10px; }
+.candidate-foot p { margin:0; max-width:65ch; font-size:.78rem; }
+.moveset-setup { margin-top:16px; min-height:300px; }
+.moveset-meta { display:flex; flex-wrap:wrap; gap:9px; margin-bottom:12px; }
+.moveset-meta > div { min-width:120px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:9px 11px; }
+.moveset-meta > div strong, .moveset-meta > div span { display:block; }
+.moveset-meta > div span { color:var(--muted); font-size:.68rem; margin-top:2px; }
+.move-picker-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.move-picker { border:1px solid var(--line); background:var(--panel-2); border-radius:14px; padding:11px; }
+.move-picker > label { display:block; color:var(--muted); font-size:.7rem; font-weight:800; margin-bottom:5px; }
+.chosen-move-summary { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.chosen-move-summary span { border:1px solid var(--line); border-radius:999px; padding:.2rem .45rem; color:var(--muted); font-size:.66rem; }
+.move-picker p { color:var(--muted); font-size:.72rem; line-height:1.4; margin:8px 0 0; }
+
+@media (max-width: 1250px) {
+  .setup-layout { grid-template-columns:280px 1fr; }
+  .setup-team { grid-column:1/-1; min-height:auto; }
+  .setup-team .team-slots { grid-template-columns:repeat(3,1fr); }
+}
+@media (max-width: 800px) {
+  .tabs { width:100%; }
+  .tab-button { flex:1; }
+  .summary-grid.four { grid-template-columns:repeat(2,1fr); }
+  .setup-layout { grid-template-columns:1fr; }
+  .pokemon-browser, .setup-main, .setup-team { min-height:auto; }
+  .pokemon-results { height:320px; }
+  .setup-team .team-slots { grid-template-columns:1fr; }
+  .candidate-head { grid-template-columns:120px 1fr; }
+  .candidate-art, .candidate-art img { min-height:120px; height:120px; }
+  .candidate-stats { grid-template-columns:repeat(3,1fr); }
+  .move-picker-grid { grid-template-columns:1fr; }
+}
+@media (max-width: 520px) {
+  .identity-row { align-items:flex-start; }
+  .mon-badge.large { width:58px; height:58px; min-width:58px; }
+  .candidate-head { grid-template-columns:1fr; }
+  .candidate-art, .candidate-art img { min-height:180px; height:180px; }
+  .candidate-controls { grid-template-columns:1fr; }
+  .candidate-foot { align-items:stretch; flex-direction:column; }
+  .proficiency-toggle.inline { min-width:0; width:100%; }
+}

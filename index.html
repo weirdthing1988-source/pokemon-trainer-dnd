@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#101722" />
-  <title>Trainer Field Sheet — Playtest</title>
+  <title>Trainer Field Sheet — Playtest v0.2</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -22,6 +22,11 @@
       </div>
     </header>
 
+    <nav class="tabs panel" aria-label="Sheet sections">
+      <button id="battleTabBtn" class="tab-button active" data-tab="battle">Battle Sheet</button>
+      <button id="setupTabBtn" class="tab-button" data-tab="setup">Team Setup</button>
+    </nav>
+
     <main>
       <section class="trainer-strip panel">
         <div class="field compact-field">
@@ -33,7 +38,7 @@
           <input id="trainerLevel" type="number" min="1" max="20" value="3" />
         </div>
         <div class="readout">
-          <span>Proficiency</span>
+          <span>Trainer PB</span>
           <strong id="trainerPB">+2</strong>
         </div>
         <div class="readout">
@@ -46,59 +51,111 @@
         </div>
       </section>
 
-      <section class="team-layout">
-        <aside class="team-rail panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">PARTY</p>
-              <h2>Team of Six</h2>
+      <section id="battleView" class="tab-view active">
+        <section class="team-layout">
+          <aside class="team-rail panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">PARTY</p>
+                <h2>Team of Six</h2>
+              </div>
+              <span class="tiny-note">Inspect or switch</span>
             </div>
-            <span class="tiny-note">Click to inspect · Switch to activate</span>
-          </div>
-          <div id="teamSlots" class="team-slots"></div>
-        </aside>
+            <div id="teamSlots" class="team-slots"></div>
+          </aside>
 
-        <section class="active-panel panel">
-          <div id="pokemonEditor"></div>
+          <section class="active-panel panel">
+            <div id="pokemonEditor"></div>
+          </section>
+
+          <aside class="combat-side panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">PLAYTEST</p>
+                <h2>Target Dummy</h2>
+              </div>
+            </div>
+            <div class="field">
+              <label for="targetName">Target name</label>
+              <input id="targetName" value="Armoured Foe" />
+            </div>
+            <div class="target-grid">
+              <div class="field numeric-field">
+                <label for="physicalDef">Physical Defence</label>
+                <input id="physicalDef" type="number" min="1" max="40" value="13" />
+              </div>
+              <div class="field numeric-field">
+                <label for="specialDef">Special Defence</label>
+                <input id="specialDef" type="number" min="1" max="40" value="13" />
+              </div>
+            </div>
+            <div class="field numeric-field">
+              <label for="targetHP">Target HP</label>
+              <div class="inline-inputs">
+                <input id="targetHP" type="number" min="0" value="100" />
+                <button id="resetTargetBtn" class="button mini secondary">Reset</button>
+              </div>
+            </div>
+
+            <div class="combat-log-header">
+              <h3>Combat Log</h3>
+              <button id="clearLogBtn" class="text-button">Clear</button>
+            </div>
+            <div id="combatLog" class="combat-log" aria-live="polite">
+              <div class="log-empty">Use a move to begin the playtest.</div>
+            </div>
+          </aside>
+        </section>
+      </section>
+
+      <section id="setupView" class="tab-view">
+        <section class="setup-layout">
+          <aside class="pokemon-browser panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">POKÉAPI</p>
+                <h2>Pokémon List</h2>
+              </div>
+              <span id="apiStatus" class="api-status">Loading…</span>
+            </div>
+            <div class="field">
+              <label for="pokemonSearch">Search by name or Pokédex ID</label>
+              <input id="pokemonSearch" type="search" placeholder="e.g. bulbasaur, 6, shuckle" autocomplete="off" />
+            </div>
+            <div id="pokemonResults" class="pokemon-results">
+              <div class="log-empty">Loading the Pokémon list from PokéAPI…</div>
+            </div>
+          </aside>
+
+          <section class="setup-main panel">
+            <div id="pokemonCandidate" class="candidate-empty">
+              <p class="eyebrow">ADD / REPLACE</p>
+              <h2>Choose a Pokémon</h2>
+              <p class="muted">Select a Pokémon from the PokéAPI list. Its types, base stats, abilities, artwork and learnset will be loaded automatically.</p>
+            </div>
+          </section>
+
+          <aside class="setup-team panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">CURRENT PARTY</p>
+                <h2>Six Slots</h2>
+              </div>
+            </div>
+            <div id="setupTeamSlots" class="team-slots"></div>
+          </aside>
         </section>
 
-        <aside class="combat-side panel">
+        <section class="moveset-setup panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">PLAYTEST</p>
-              <h2>Target Dummy</h2>
+              <p class="eyebrow">MOVE PERMISSIONS</p>
+              <h2 id="setupMovesHeading">Team Moveset</h2>
             </div>
+            <span class="tiny-note">Four moves maximum · PokéAPI learnset only</span>
           </div>
-          <div class="field">
-            <label for="targetName">Target name</label>
-            <input id="targetName" value="Armoured Foe" />
-          </div>
-          <div class="target-grid">
-            <div class="field numeric-field">
-              <label for="physicalDef">Physical Defence</label>
-              <input id="physicalDef" type="number" min="1" max="40" value="13" />
-            </div>
-            <div class="field numeric-field">
-              <label for="specialDef">Special Defence</label>
-              <input id="specialDef" type="number" min="1" max="40" value="13" />
-            </div>
-          </div>
-          <div class="field numeric-field">
-            <label for="targetHP">Target HP</label>
-            <div class="inline-inputs">
-              <input id="targetHP" type="number" min="0" value="100" />
-              <button id="resetTargetBtn" class="button mini secondary">Reset</button>
-            </div>
-          </div>
-
-          <div class="combat-log-header">
-            <h3>Combat Log</h3>
-            <button id="clearLogBtn" class="text-button">Clear</button>
-          </div>
-          <div id="combatLog" class="combat-log" aria-live="polite">
-            <div class="log-empty">Use a move to begin the playtest.</div>
-          </div>
-        </aside>
+          <div id="setupMovesEditor"></div>
+        </section>
       </section>
 
       <section class="rules-summary panel">
@@ -108,9 +165,10 @@
         </div>
         <div class="rule-chips">
           <span>1 active Pokémon</span>
-          <span>4 moves each</span>
+          <span>4 legal moves each</span>
           <span>0 HP = Fainted</span>
           <span>Rank = Base Stat ÷ 17</span>
+          <span>PB only if proficient</span>
           <span>Full Rest = Full Restore</span>
         </div>
       </section>
@@ -139,7 +197,7 @@
         <label class="setting-row checkbox-row">
           <span>
             <strong>Milestone Damage Dice</strong>
-            <small>At Pokémon levels 5, 10 and 15, add Trainer PB dice per milestone.</small>
+            <small>At Pokémon levels 5, 10 and 15, a proficient Trainer adds PB dice per milestone.</small>
           </span>
           <input id="milestoneSetting" type="checkbox" checked />
         </label>
@@ -155,7 +213,7 @@
         <label class="setting-row">
           <span>
             <strong>Short Rest Healing</strong>
-            <small>Current playtest default: this many × the Pokémon's per-level HP growth.</small>
+            <small>Multiplier applied to that Pokémon's per-level HP growth.</small>
           </span>
           <input id="shortRestMultiplierSetting" type="number" min="0" max="5" step="0.5" value="1" />
         </label>
@@ -173,10 +231,12 @@
         <h3>Prototype Formulae</h3>
         <p><strong>Stat Rank:</strong> round(Base Stat ÷ 17), with .5 rounding up.</p>
         <p><strong>Stat Modifier:</strong> floor((Rank − 5) ÷ 2).</p>
-        <p><strong>Max HP:</strong> Base HP + (Level − 1) × (ceil(Base HP ÷ 2) + 1).</p>
+        <p><strong>Level 1 HP:</strong> raw Base HP.</p>
+        <p><strong>HP Growth:</strong> round(Base HP ÷ 10) + 1 for each level after Level 1.</p>
         <p><strong>Accuracy Score:</strong> round(8 + Move Accuracy ÷ 20); Accuracy Modifier = Score − 10.</p>
-        <p><strong>Attack Roll:</strong> d20 + Trainer PB + Offensive Stat Modifier + Accuracy Modifier.</p>
-        <p><strong>Base Damage Dice:</strong> ceil(Offensive Rank ÷ 2). Move sets the die size.</p>
+        <p><strong>Attack Roll:</strong> d20 + eligible Trainer PB + Offensive Stat Modifier + Accuracy Modifier.</p>
+        <p><strong>Base Damage Dice:</strong> ceil(Offensive Rank ÷ 2). PokéAPI move power sets the provisional die size.</p>
+        <p><strong>Trainer Proficiency:</strong> PB and PB-based milestone dice apply only to Pokémon the Trainer is proficient commanding.</p>
         <p><strong>Sure Hit:</strong> bypasses the To Hit roll.</p>
       </div>
 

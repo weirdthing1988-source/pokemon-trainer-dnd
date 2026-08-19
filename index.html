@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101722" />
+  <title>Trainer Field Sheet — Playtest</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">D&D HOMEBREW PLAYTEST</p>
+        <h1>Trainer Field Sheet</h1>
+        <p class="subtitle">One Trainer. Six partners. One active Pokémon at a time.</p>
+      </div>
+      <div class="top-actions">
+        <button id="exportBtn" class="button secondary">Export JSON</button>
+        <label class="button secondary file-button">Import JSON<input id="importInput" type="file" accept="application/json" /></label>
+        <button id="rulesBtn" class="button primary">Rules & Settings</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="trainer-strip panel">
+        <div class="field compact-field">
+          <label for="trainerName">Trainer</label>
+          <input id="trainerName" value="Playtest Trainer" />
+        </div>
+        <div class="field compact-field numeric-field">
+          <label for="trainerLevel">Level</label>
+          <input id="trainerLevel" type="number" min="1" max="20" value="3" />
+        </div>
+        <div class="readout">
+          <span>Proficiency</span>
+          <strong id="trainerPB">+2</strong>
+        </div>
+        <div class="readout">
+          <span>Available</span>
+          <strong id="availableCount">6 / 6</strong>
+        </div>
+        <div class="rest-controls">
+          <button id="shortRestBtn" class="button secondary">Short Rest</button>
+          <button id="longRestBtn" class="button secondary">Full Rest</button>
+        </div>
+      </section>
+
+      <section class="team-layout">
+        <aside class="team-rail panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">PARTY</p>
+              <h2>Team of Six</h2>
+            </div>
+            <span class="tiny-note">Click to inspect · Switch to activate</span>
+          </div>
+          <div id="teamSlots" class="team-slots"></div>
+        </aside>
+
+        <section class="active-panel panel">
+          <div id="pokemonEditor"></div>
+        </section>
+
+        <aside class="combat-side panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">PLAYTEST</p>
+              <h2>Target Dummy</h2>
+            </div>
+          </div>
+          <div class="field">
+            <label for="targetName">Target name</label>
+            <input id="targetName" value="Armoured Foe" />
+          </div>
+          <div class="target-grid">
+            <div class="field numeric-field">
+              <label for="physicalDef">Physical Defence</label>
+              <input id="physicalDef" type="number" min="1" max="40" value="13" />
+            </div>
+            <div class="field numeric-field">
+              <label for="specialDef">Special Defence</label>
+              <input id="specialDef" type="number" min="1" max="40" value="13" />
+            </div>
+          </div>
+          <div class="field numeric-field">
+            <label for="targetHP">Target HP</label>
+            <div class="inline-inputs">
+              <input id="targetHP" type="number" min="0" value="100" />
+              <button id="resetTargetBtn" class="button mini secondary">Reset</button>
+            </div>
+          </div>
+
+          <div class="combat-log-header">
+            <h3>Combat Log</h3>
+            <button id="clearLogBtn" class="text-button">Clear</button>
+          </div>
+          <div id="combatLog" class="combat-log" aria-live="polite">
+            <div class="log-empty">Use a move to begin the playtest.</div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="rules-summary panel">
+        <div>
+          <p class="eyebrow">CURRENT CORE RULES</p>
+          <h2>What this prototype is testing</h2>
+        </div>
+        <div class="rule-chips">
+          <span>1 active Pokémon</span>
+          <span>4 moves each</span>
+          <span>0 HP = Fainted</span>
+          <span>Rank = Base Stat ÷ 17</span>
+          <span>Full Rest = Full Restore</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="rulesDialog" class="modal">
+    <form method="dialog" class="modal-card" id="rulesForm">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">PLAYTEST CONTROLS</p>
+          <h2>Rules & Settings</h2>
+        </div>
+        <button class="icon-button" value="cancel" aria-label="Close">×</button>
+      </div>
+
+      <div class="settings-grid">
+        <label class="setting-row">
+          <span>
+            <strong>Minimum Stat Rank</strong>
+            <small>Prevents tiny base stats rounding to zero.</small>
+          </span>
+          <input id="minRankSetting" type="number" min="0" max="3" value="1" />
+        </label>
+
+        <label class="setting-row checkbox-row">
+          <span>
+            <strong>Milestone Damage Dice</strong>
+            <small>At Pokémon levels 5, 10 and 15, add Trainer PB dice per milestone.</small>
+          </span>
+          <input id="milestoneSetting" type="checkbox" checked />
+        </label>
+
+        <label class="setting-row checkbox-row">
+          <span>
+            <strong>Short Rest: Active Only</strong>
+            <small>When off, choose any non-fainted team member.</small>
+          </span>
+          <input id="shortRestActiveSetting" type="checkbox" />
+        </label>
+
+        <label class="setting-row">
+          <span>
+            <strong>Short Rest Healing</strong>
+            <small>Current playtest default: this many × the Pokémon's per-level HP growth.</small>
+          </span>
+          <input id="shortRestMultiplierSetting" type="number" min="0" max="5" step="0.5" value="1" />
+        </label>
+
+        <label class="setting-row checkbox-row">
+          <span>
+            <strong>Natural 1 / Natural 20</strong>
+            <small>Natural 1 always misses; natural 20 always hits and doubles move dice.</small>
+          </span>
+          <input id="critSetting" type="checkbox" checked />
+        </label>
+      </div>
+
+      <div class="formula-box">
+        <h3>Prototype Formulae</h3>
+        <p><strong>Stat Rank:</strong> round(Base Stat ÷ 17), with .5 rounding up.</p>
+        <p><strong>Stat Modifier:</strong> floor((Rank − 5) ÷ 2).</p>
+        <p><strong>Max HP:</strong> Base HP + (Level − 1) × (ceil(Base HP ÷ 2) + 1).</p>
+        <p><strong>Accuracy Score:</strong> round(8 + Move Accuracy ÷ 20); Accuracy Modifier = Score − 10.</p>
+        <p><strong>Attack Roll:</strong> d20 + Trainer PB + Offensive Stat Modifier + Accuracy Modifier.</p>
+        <p><strong>Base Damage Dice:</strong> ceil(Offensive Rank ÷ 2). Move sets the die size.</p>
+        <p><strong>Sure Hit:</strong> bypasses the To Hit roll.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button id="resetDemoBtn" type="button" class="button danger">Reset Demo Data</button>
+        <button id="saveRulesBtn" value="default" class="button primary">Save Settings</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="shortRestDialog" class="modal small-modal">
+    <form method="dialog" class="modal-card">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">SHORT REST</p>
+          <h2>Choose one partner</h2>
+        </div>
+        <button class="icon-button" value="cancel" aria-label="Close">×</button>
+      </div>
+      <p id="shortRestHelp" class="muted"></p>
+      <div id="shortRestChoices" class="rest-choice-list"></div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

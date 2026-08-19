@@ -1,6 +1,14 @@
-# Trainer Field Sheet — Playtest v0.3
+# Trainer Field Sheet — Playtest v0.4
 
 A dependency-free static web prototype for a Pokémon Trainer D&D class. It is designed for Cloudflare Pages and now uses PokéAPI in the browser for Pokémon, base stats, types, artwork, abilities and legal move data.
+
+## v0.4 changes
+
+- Mega Evolutions are filtered out of the Team Setup Pokémon list and cannot be added directly as team members.
+- Pokémon species with Mega varieties gain a **Mega Evolution** control on the Battle Sheet. Pokémon with multiple Mega forms, such as Charizard, also receive a form selector.
+- Activating Mega Evolution loads that Mega form's PokéAPI stats, types, artwork and abilities for combat calculations while retaining the base Pokémon's moves, level and HP pool.
+- The move-selection panel now includes an editable **D&D Pokémon Level** field so legal/locked moves update without leaving Team Setup.
+- If a Pokémon's level is reduced below an equipped level-up move's requirement, the move remains visible but becomes locked and cannot be used until permitted again.
 
 
 ## v0.3 learnset fix

@@ -328,3 +328,21 @@ h3 { margin-bottom: .6rem; }
   .candidate-foot { align-items:stretch; flex-direction:column; }
   .proficiency-toggle.inline { min-width:0; width:100%; }
 }
+
+/* v0.4 — Mega Evolution and moveset-level controls */
+.editor-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.mega-control { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:7px 9px; border:1px solid rgba(255,211,74,.35); background:rgba(255,211,74,.06); border-radius:12px; }
+.mega-control select { width:auto; min-width:150px; }
+.mega-name { font-size:.72rem; font-weight:850; color:var(--accent); }
+.mega-toggle { display:flex; align-items:center; gap:7px; cursor:pointer; font-size:.72rem; font-weight:850; }
+.mega-toggle input { width:19px; height:19px; }
+.moveset-level-control { min-width:150px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:8px 10px; display:grid; grid-template-columns:1fr 64px; gap:8px; align-items:center; }
+.moveset-level-control span { color:var(--muted); font-size:.68rem; font-weight:750; }
+.moveset-level-control input { min-width:0; padding:.48rem .55rem; }
+.move-card.locked-move { opacity:.68; border-style:dashed; }
+.move-card.locked-move .move-preview strong { color:var(--warn); }
+@media (max-width: 800px) {
+  .editor-actions { justify-content:flex-start; }
+  .mega-control { width:100%; }
+  .moveset-level-control { width:100%; }
+}
